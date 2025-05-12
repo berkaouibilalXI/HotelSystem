@@ -11,9 +11,9 @@ import {
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent,TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
-import { Wifi, Coffee, CarFront, Pool, Dumbbell, Spa } from "lucide-react"
+import { Wifi, Coffee, CarFront, Waves, Dumbbell, Flame } from "lucide-react"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import { fadeIn, fadeInUp } from "@/components/motion/animations"
@@ -83,9 +83,9 @@ const amenityIcons = {
   wifi: Wifi,
   breakfast: Coffee,
   parking: CarFront,
-  pool: Pool,
+  pool: Waves,
   gym: Dumbbell,
-  spa: Spa
+  spa: Flame
 }
 
 const RoomDetail = () => {

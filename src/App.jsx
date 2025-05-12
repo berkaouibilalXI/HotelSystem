@@ -18,23 +18,18 @@ import DashboardPage from "./pages/admin/DashboardPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import NotFound from "./pages/NotFound";
 import RoomsPage from "./pages/RoomsPage";
-import RoomDetailPage from "./pages/RoomDetailPage";
+import RoomDetailPage from "@/pages/RoomDetailPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import BookNowPage from "./pages/BookNowPage";
+// import RoomsPage from "./pages/RoomsPage";
+// import RoomDetailPage from "./pages/RoomDetailPage";
+// import AboutPage from "./pages/AboutPage";
+// import ContactPage from "./pages/ContactPage";
+// import BookNowPage from "./pages/BookNowPage";
 
 
 
-import RoomDetailPage from "./pages/RoomDetailPage";
-
-
-import AboutPage from "./pages/AboutPage";
-
-
-import ContactPage from "./pages/ContactPage";
-
-
-import BookNowPage from "./pages/BookNowPage";
 
 // Protected route
 import ProtectedRoute from "./components/ProtectedRoute";

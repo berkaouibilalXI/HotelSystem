@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
+import {Droplet} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
