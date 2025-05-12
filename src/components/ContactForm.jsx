@@ -29,6 +29,7 @@ const ContactForm = () => {
         email,
         message,
         read: false,
+        createdAt: new Date(), // Added createdAt for sorting/tracking
       };
 
       await addContactMessage(contactMessage);
@@ -56,21 +57,21 @@ const ContactForm = () => {
   };
 
   return (
-    <div className="section-padding" id="contact">
+    <div className="section-padding bg-gray-50 dark:bg-slate-900" id="contact"> {/* Added dark mode background */}
       <div className="hotel-container">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-start"> {/* Added items-start for better alignment */}
           <div>
-            <h2 className="text-3xl font-bold mb-4">Contact Us</h2>
-            <p className="text-gray-600 mb-6">
+            <h2 className="text-3xl font-bold mb-4 dark:text-white">Contact Us</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               Have questions or need assistance? Reach out to our friendly team
               and we'll get back to you as soon as possible.
             </p>
 
             <div className="space-y-6">
               <div className="flex items-start">
-                <div className="bg-hotel-100 p-3 rounded-full mr-4">
+                <div className="bg-hotel-100 dark:bg-hotel-700 p-3 rounded-full mr-4">
                   <svg
-                    className="w-6 h-6 text-hotel-600"
+                    className="w-6 h-6 text-hotel-600 dark:text-hotel-100"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -91,17 +92,17 @@ const ContactForm = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Address</h3>
-                  <p className="text-gray-600">
+                  <h3 className="font-semibold text-lg dark:text-gray-100">Address</h3>
+                  <p className="text-gray-600 dark:text-gray-400">
                     123 Luxury Avenue, Beverly Hills, CA 90210
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start">
-                <div className="bg-hotel-100 p-3 rounded-full mr-4">
+                <div className="bg-hotel-100 dark:bg-hotel-700 p-3 rounded-full mr-4">
                   <svg
-                    className="w-6 h-6 text-hotel-600"
+                    className="w-6 h-6 text-hotel-600 dark:text-hotel-100"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -116,15 +117,15 @@ const ContactForm = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Email</h3>
-                  <p className="text-gray-600">info@b-hotel.com</p>
+                  <h3 className="font-semibold text-lg dark:text-gray-100">Email</h3>
+                  <p className="text-gray-600 dark:text-gray-400">info@b-hotel.com</p>
                 </div>
               </div>
 
               <div className="flex items-start">
-                <div className="bg-hotel-100 p-3 rounded-full mr-4">
+                <div className="bg-hotel-100 dark:bg-hotel-700 p-3 rounded-full mr-4">
                   <svg
-                    className="w-6 h-6 text-hotel-600"
+                    className="w-6 h-6 text-hotel-600 dark:text-hotel-100"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -139,20 +140,20 @@ const ContactForm = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Phone</h3>
-                  <p className="text-gray-600">+1 (555) 123-4567</p>
+                  <h3 className="font-semibold text-lg dark:text-gray-100">Phone</h3>
+                  <p className="text-gray-600 dark:text-gray-400">+1 (555) 123-4567</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-2xl font-bold mb-6">Send us a message</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 md:p-8"> {/* Added md:p-8 for more padding on larger screens */}
+            <h3 className="text-2xl font-bold mb-6 dark:text-white">Send us a message</h3>
+            <form onSubmit={handleSubmit} className="space-y-5"> {/* Increased space-y */}
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
                   Name
                 </label>
@@ -161,7 +162,7 @@ const ContactForm = () => {
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 dark:focus:ring-hotel-500 focus:border-transparent dark:focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="Your name"
                   required
                 />
@@ -170,7 +171,7 @@ const ContactForm = () => {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
                   Email
                 </label>
@@ -179,7 +180,7 @@ const ContactForm = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 dark:focus:ring-hotel-500 focus:border-transparent dark:focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="Your email address"
                   required
                 />
@@ -188,7 +189,7 @@ const ContactForm = () => {
               <div>
                 <label
                   htmlFor="message"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
                   Message
                 </label>
@@ -197,7 +198,7 @@ const ContactForm = () => {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={5}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 dark:focus:ring-hotel-500 focus:border-transparent dark:focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="How can we help you?"
                   required
                 ></textarea>
@@ -206,7 +207,7 @@ const ContactForm = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-hotel-600 hover:bg-hotel-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 flex justify-center items-center"
+                className="w-full bg-hotel-600 hover:bg-hotel-700 dark:bg-hotel-500 dark:hover:bg-hotel-600 text-white font-medium py-2.5 px-4 rounded-md transition duration-300 flex justify-center items-center" /* Adjusted py */
               >
                 {loading ? (
                   <>

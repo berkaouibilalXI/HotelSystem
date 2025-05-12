@@ -30,7 +30,11 @@ const BookingForm = () => {
         const fetchedRooms = await getRooms();
         setRooms(fetchedRooms.filter((room) => room.available));
         if (fetchedRooms.length > 0) {
-          setSelectedRoomId(fetchedRooms[0].id || "");
+          // Ensure there's at least one available room before setting
+          const availableRooms = fetchedRooms.filter(room => room.available);
+          if (availableRooms.length > 0) {
+            setSelectedRoomId(availableRooms[0].id || "");
+          }
         }
       } catch (error) {
         console.error("Error fetching rooms:", error);
@@ -55,7 +59,7 @@ const BookingForm = () => {
     const nights = Math.ceil(
       (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24),
     );
-    return selectedRoom.price * (nights > 0 ? nights : 1);
+    return selectedRoom.price * (nights > 0 ? nights : 1); // Ensure at least 1 night is charged if dates are same
   };
 
   const totalPrice = calculateTotalPrice();
@@ -80,7 +84,7 @@ const BookingForm = () => {
       return;
     }
 
-    if (checkIn >= checkOut) {
+    if (checkOut <= checkIn) { // checkOut must be strictly after checkIn
       toast({
         title: "Error",
         description: "Check-out date must be after check-in date",
@@ -117,6 +121,12 @@ const BookingForm = () => {
       setGuestPhone("");
       setCheckIn(undefined);
       setCheckOut(undefined);
+      // Optionally reset selectedRoomId if desired, or keep it
+      // if (rooms.length > 0 && rooms.filter(r => r.available).length > 0) {
+      //   setSelectedRoomId(rooms.filter(r => r.available)[0].id || "");
+      // } else {
+      //   setSelectedRoomId("");
+      // }
     } catch (error) {
       console.error("Error submitting booking:", error);
       toast({
@@ -130,21 +140,21 @@ const BookingForm = () => {
   };
 
   return (
-    <div className="section-padding bg-gray-50" id="booking">
+    <div className="section-padding bg-gray-50 dark:bg-slate-900" id="booking">
       <div className="hotel-container">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold mb-3">Book Your Stay</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold mb-3 dark:text-white">Book Your Stay</h2>
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Reserve your perfect room with our simple booking form and start
             planning your dream getaway today.
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md max-w-4xl mx-auto">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Check-in Date
                 </label>
                 <Popover>
@@ -152,8 +162,8 @@ const BookingForm = () => {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !checkIn && "text-muted-foreground",
+                        "w-full justify-start text-left font-normal dark:bg-slate-700 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-600",
+                        !checkIn && "text-muted-foreground dark:text-gray-400",
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
@@ -164,21 +174,21 @@ const BookingForm = () => {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 pointer-events-auto">
+                  <PopoverContent className="w-auto p-0 pointer-events-auto dark:bg-slate-800"> {/* Shadcn Calendar should handle its own dark mode */}
                     <Calendar
                       mode="single"
                       selected={checkIn}
                       onSelect={setCheckIn}
                       initialFocus
-                      disabled={(date) => date < new Date()}
-                      className="p-3 pointer-events-auto"
+                      disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))} // Disable past dates
+                      className="p-3 pointer-events-auto" // Calendar itself should be dark mode aware via Shadcn
                     />
                   </PopoverContent>
                 </Popover>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Check-out Date
                 </label>
                 <Popover>
@@ -186,8 +196,8 @@ const BookingForm = () => {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !checkOut && "text-muted-foreground",
+                        "w-full justify-start text-left font-normal dark:bg-slate-700 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-600",
+                        !checkOut && "text-muted-foreground dark:text-gray-400",
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
@@ -198,36 +208,36 @@ const BookingForm = () => {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 pointer-events-auto">
+                  <PopoverContent className="w-auto p-0 pointer-events-auto dark:bg-slate-800"> {/* Shadcn Calendar should handle its own dark mode */}
                     <Calendar
                       mode="single"
                       selected={checkOut}
                       onSelect={setCheckOut}
                       initialFocus
                       disabled={(date) =>
-                        checkIn ? date <= checkIn : date < new Date()
+                        checkIn ? date <= checkIn : date < new Date(new Date().setHours(0,0,0,0)) // Disable dates before or on checkIn
                       }
-                      className="p-3 pointer-events-auto"
+                      className="p-3 pointer-events-auto" // Calendar itself should be dark mode aware via Shadcn
                     />
                   </PopoverContent>
                 </Popover>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Room Type
                 </label>
                 <select
                   value={selectedRoomId}
                   onChange={(e) => setSelectedRoomId(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 dark:focus:ring-hotel-500 focus:border-transparent dark:focus:border-transparent"
                   required
                 >
-                  <option value="" disabled>
+                  <option value="" disabled className="text-gray-500 dark:text-gray-400">
                     Select a room
                   </option>
                   {rooms.map((room) => (
-                    <option key={room.id} value={room.id}>
+                    <option key={room.id} value={room.id} className="dark:bg-slate-700 dark:text-gray-200">
                       {room.name} - ${room.price}/night
                     </option>
                   ))}
@@ -235,42 +245,42 @@ const BookingForm = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Full Name
                 </label>
                 <input
                   type="text"
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 dark:focus:ring-hotel-500 focus:border-transparent dark:focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="John Doe"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Email Address
                 </label>
                 <input
                   type="email"
                   value={guestEmail}
                   onChange={(e) => setGuestEmail(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 dark:focus:ring-hotel-500 focus:border-transparent dark:focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="john@example.com"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Phone Number
                 </label>
                 <input
                   type="tel"
                   value={guestPhone}
                   onChange={(e) => setGuestPhone(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 dark:focus:ring-hotel-500 focus:border-transparent dark:focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="+1 (555) 123-4567"
                   required
                 />
@@ -278,34 +288,34 @@ const BookingForm = () => {
             </div>
 
             {checkIn && checkOut && selectedRoomId && (
-              <div className="bg-gray-50 p-4 rounded-md">
-                <h4 className="font-medium text-gray-700 mb-2">
+              <div className="bg-gray-100 dark:bg-slate-700 p-4 rounded-md">
+                <h4 className="font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Booking Summary
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                   <div>
-                    <span className="text-gray-500">Room:</span>{" "}
-                    <span className="font-medium">{selectedRoom?.name}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Room:</span>{" "}
+                    <span className="font-medium dark:text-gray-100">{selectedRoom?.name}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Price per night:</span>{" "}
-                    <span className="font-medium">${selectedRoom?.price}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Price per night:</span>{" "}
+                    <span className="font-medium dark:text-gray-100">${selectedRoom?.price}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Check-in:</span>{" "}
-                    <span className="font-medium">
+                    <span className="text-gray-600 dark:text-gray-400">Check-in:</span>{" "}
+                    <span className="font-medium dark:text-gray-100">
                       {checkIn ? format(checkIn, "PPP") : ""}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Check-out:</span>{" "}
-                    <span className="font-medium">
+                    <span className="text-gray-600 dark:text-gray-400">Check-out:</span>{" "}
+                    <span className="font-medium dark:text-gray-100">
                       {checkOut ? format(checkOut, "PPP") : ""}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Nights:</span>{" "}
-                    <span className="font-medium">
+                    <span className="text-gray-600 dark:text-gray-400">Nights:</span>{" "}
+                    <span className="font-medium dark:text-gray-100">
                       {Math.ceil(
                         (checkOut.getTime() - checkIn.getTime()) /
                           (1000 * 60 * 60 * 24),
@@ -313,8 +323,8 @@ const BookingForm = () => {
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Total:</span>{" "}
-                    <span className="font-bold text-hotel-700">
+                    <span className="text-gray-600 dark:text-gray-400">Total:</span>{" "}
+                    <span className="font-bold text-hotel-700 dark:text-hotel-400">
                       ${totalPrice}
                     </span>
                   </div>
@@ -326,7 +336,7 @@ const BookingForm = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full md:w-auto bg-hotel-600 hover:bg-hotel-700 text-white font-medium py-2 px-6 rounded-md transition duration-300 flex justify-center items-center"
+                className="w-full md:w-auto bg-hotel-600 hover:bg-hotel-700 dark:bg-hotel-500 dark:hover:bg-hotel-600 text-white font-medium py-2 px-6 rounded-md transition duration-300 flex justify-center items-center"
               >
                 {loading ? (
                   <>

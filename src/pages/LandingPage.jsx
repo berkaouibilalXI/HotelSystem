@@ -1,6 +1,6 @@
 import Hero from "@/components/Hero";
 import RoomsList from "@/components/RoomsList";
-import BookingForm from "@/components/BookingForm";
+import BookingForm from "../components/BookingForm";
 import Amenities from "@/components/Amenities";
 import Testimonials from "@/components/Testimonials";
 import ContactForm from "@/components/ContactForm";

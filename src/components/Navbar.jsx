@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/firebase/auth-context";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,6 +19,59 @@ const Navbar = () => {
       console.error("Error logging out:", error);
     }
   };
+
+  // Animation variants for the mobile menu
+  const menuVariants = {
+    hidden: {
+      opacity: 0,
+      maxHeight: 0, // Animate maxHeight for smoother performance
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut",
+        when: "afterChildren",
+        staggerChildren: 0.05,
+        staggerDirection: -1,
+      },
+    },
+    visible: {
+      opacity: 1,
+      maxHeight: "500px", // Set a sufficiently large maxHeight
+      transition: {
+        duration: 0.4, // Slightly longer for a smoother feel
+        ease: "easeInOut",
+        when: "beforeChildren",
+        staggerChildren: 0.07,
+      },
+    },
+  };
+
+  const menuItemVariants = {
+    hidden: { opacity: 0, y: -15, transition: { duration: 0.2, ease: "easeOut" } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } },
+  };
+
+  // Variants for the hamburger/close icon paths
+  const pathVariants = {
+    closed: { d: "M4 6h16M4 12h16M4 18h16", transition: { duration: 0.3, ease: "easeInOut" } },
+    open: { d: "M6 18L18 6M6 6l12 12", transition: { duration: 0.3, ease: "easeInOut" } },
+  };
+  
+  // Simpler hamburger animation by rotating lines
+  const topBarVariants = {
+    closed: { rotate: 0, y: 0 },
+    open: { rotate: 45, y: 6 }, // y value depends on stroke-width and desired position
+  };
+
+  const middleBarVariants = {
+    closed: { opacity: 1 },
+    open: { opacity: 0 },
+  };
+
+  const bottomBarVariants = {
+    closed: { rotate: 0, y: 0 },
+    open: { rotate: -45, y: -6 }, // y value depends on stroke-width and desired position
+  };
+
 
   return (
     <motion.nav
@@ -107,105 +160,122 @@ const Navbar = () => {
             <ThemeToggle />
             <button
               onClick={toggleMenu}
-              className="text-gray-700 hover:text-hotel-600 focus:outline-none dark:text-white"
+              className="text-gray-700 hover:text-hotel-600 focus:outline-none dark:text-white p-1"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu" // Added aria-controls
             >
-              <svg
+              <motion.svg
                 className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
-                viewBox="0 0 24 24"
+                viewBox="0 0 24 24" // Ensure viewBox is appropriate for the icon
                 xmlns="http://www.w3.org/2000/svg"
+                animate={isMenuOpen ? "open" : "closed"}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                {isMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
+                <motion.path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16"
+                  variants={topBarVariants}
+                />
+                <motion.path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 12h16"
+                  variants={middleBarVariants}
+                />
+                <motion.path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 18h16"
+                  variants={bottomBarVariants}
+                />
+              </motion.svg>
             </button>
           </div>
         </div>
 
         {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 space-y-4">
-            <Link
-              to="/"
-              className="block text-gray-700 hover:text-hotel-600 transition-colors dark:text-gray-300 dark:hover:text-white"
-              onClick={() => setIsMenuOpen(false)}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              id="mobile-menu" // Added id for aria-controls
+              className="md:hidden py-2 space-y-1 overflow-hidden" // Adjusted padding
+              variants={menuVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
             >
-              Home
-            </Link>
-            <Link
-              to="/rooms"
-              className="block text-gray-700 hover:text-hotel-600 transition-colors dark:text-gray-300 dark:hover:text-white"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Rooms
-            </Link>
-            <Link
-              to="/about"
-              className="block text-gray-700 hover:text-hotel-600 transition-colors dark:text-gray-300 dark:hover:text-white"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className="block text-gray-700 hover:text-hotel-600 transition-colors dark:text-gray-300 dark:hover:text-white"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            {currentUser ? (
-              <>
-                {userRole && (userRole === "admin" || userRole === "staff") && (
+              {[
+                { to: "/", label: "Home" },
+                { to: "/rooms", label: "Rooms" },
+                { to: "/about", label: "About" },
+                { to: "/contact", label: "Contact" },
+              ].map((item) => (
+                <motion.div key={item.to} variants={menuItemVariants}>
                   <Link
-                    to="/dashboard"
-                    className="block text-gray-700 hover:text-hotel-600 transition-colors dark:text-gray-300 dark:hover:text-white"
+                    to={item.to}
+                    className="block px-3 py-2.5 rounded-md text-base font-medium text-gray-700 hover:text-hotel-600 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Dashboard
+                    {item.label}
                   </Link>
-                )}
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMenuOpen(false);
-                  }}
-                  className="block w-full text-left text-gray-700 hover:text-hotel-600 transition-colors dark:text-gray-300 dark:hover:text-white"
+                </motion.div>
+              ))}
+
+              {currentUser ? (
+                <>
+                  {userRole && (userRole === "admin" || userRole === "staff") && (
+                    <motion.div variants={menuItemVariants}>
+                      <Link
+                        to="/dashboard"
+                        className="block px-3 py-2.5 rounded-md text-base font-medium text-gray-700 hover:text-hotel-600 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                    </motion.div>
+                  )}
+                  <motion.div variants={menuItemVariants}>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-3 py-2.5 rounded-md text-base font-medium text-gray-700 hover:text-hotel-600 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
+                    >
+                      Logout
+                    </button>
+                  </motion.div>
+                </>
+              ) : (
+                <motion.div variants={menuItemVariants}>
+                  <Link
+                    to="/login"
+                    className="block px-3 py-2.5 rounded-md text-base font-medium text-gray-700 hover:text-hotel-600 hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                </motion.div>
+              )}
+              <motion.div variants={menuItemVariants} className="pt-2 pb-2"> {/* Added pb-2 */}
+                <Link
+                  to="/book-now"
+                  className="block text-center bg-hotel-600 text-white px-6 py-2.5 rounded-md hover:bg-hotel-700 transition-colors dark:bg-hotel-700 dark:hover:bg-hotel-800"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <Link
-                to="/login"
-                className="block text-gray-700 hover:text-hotel-600 transition-colors dark:text-gray-300 dark:hover:text-white"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Login
-              </Link>
-            )}
-            <Link
-              to="/book-now"
-              className="block bg-hotel-600 text-white px-6 py-2 rounded hover:bg-hotel-700 transition-colors dark:bg-hotel-700 dark:hover:bg-hotel-800"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Book Now
-            </Link>
-          </div>
-        )}
+                  Book Now
+                </Link>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.nav>
   );
