@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "./config";
+import { toast } from "sonner";
 
 const AuthContext = createContext(null);
 
@@ -105,6 +106,28 @@ export function AuthProvider({ children }) {
       console.error("Error signing up:", error);
       throw error;
     }
+  }
+  
+  async function signupWithGoogle(){
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const userCredential = result.user;
+      const userRef = doc(db, "users", userCredential.uid);
+      if (!userRef.exists()) {
+        // New user, set default role
+        await setDoc(userRef, {
+          email: userCredential.email,
+          name: userCredential.displayName,
+          role: "guest",
+          createdAt: new Date(),
+          });
+        }
+        setUserRole("guest");
+      } catch (error) {
+        toast.error("Error signing up with Google:", error);
+        throw error;
+      }
   }
 
   async function logout() {
