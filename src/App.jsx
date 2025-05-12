@@ -17,6 +17,24 @@ import SignupPage from "./pages/SignupPage";
 import DashboardPage from "./pages/admin/DashboardPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import NotFound from "./pages/NotFound";
+import RoomsPage from "./pages/RoomsPage";
+import RoomDetailPage from "./pages/RoomDetailPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import BookNowPage from "./pages/BookNowPage";
+
+
+
+import RoomDetailPage from "./pages/RoomDetailPage";
+
+
+import AboutPage from "./pages/AboutPage";
+
+
+import ContactPage from "./pages/ContactPage";
+
+
+import BookNowPage from "./pages/BookNowPage";
 
 // Protected route
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -43,6 +61,11 @@ const App = () => {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/rooms" element={<RoomsPage />} />
+                <Route path="/rooms/:id" element={<RoomDetailPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/book-now" element={<BookNowPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
