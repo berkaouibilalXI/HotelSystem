@@ -20,6 +20,9 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
 
+    // Add transition styles to the root element
+    root.style.transition = "background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease";
+
     root.classList.remove("light", "dark");
 
     if (theme === "system") {

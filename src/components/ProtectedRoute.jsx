@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/firebase/auth-context";
+import { useAuth } from "../firebase/auth-context";
 
 const ProtectedRoute = ({ children, requiredRole = ["admin", "staff"] }) => {
-  const { currentUser, userRole, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -12,15 +12,16 @@ const ProtectedRoute = ({ children, requiredRole = ["admin", "staff"] }) => {
     );
   }
 
-  if (!currentUser) {
+  if (!user) {
     return <Navigate to="/login" />;
   }
 
-  if (requiredRole.length > 0 && userRole && !requiredRole.includes(userRole)) {
-    return <Navigate to="/unauthorized" />;
+  // If no role is required or user has the required role
+  if (requiredRole.length === 0 || (user.role && requiredRole.includes(user.role))) {
+    return <>{children}</>;
   }
 
-  return <>{children}</>;
+  return <Navigate to="/unauthorized" />;
 };
 
 export default ProtectedRoute;

@@ -1,168 +1,142 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  signInWithPopup,
+import { createContext, useContext, useState, useEffect } from "react";
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  signOut as firebaseSignOut,
   createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "./config";
-import { toast } from "sonner";
+import { app } from "./config";
+import { db } from "./config";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
 
-export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userRole, setUserRole] = useState(null);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const auth = getAuth(app);
 
-  async function getUserRole(uid) {
+  const fetchUserRole = async (uid) => {
     try {
-      const userRef = doc(db, "users", uid);
-      const userSnap = await getDoc(userRef);
-
-      if (userSnap.exists()) {
-        return userSnap.data().role || "guest";
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        return userDoc.data().role;
       }
-
-      return "guest";
+      return null;
     } catch (error) {
-      console.error("Error getting user role:", error);
-      return "guest";
+      console.error("Error fetching user role:", error);
+      return null;
     }
-  }
-
-  async function login(email, password) {
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-      const role = await getUserRole(userCredential.user.uid);
-      setUserRole(role);
-    } catch (error) {
-      console.error("Error logging in:", error);
-      throw error;
-    }
-  }
-
-  async function loginWithGoogle() {
-    try {
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-
-      // Check if this is a new user
-      const userRef = doc(db, "users", userCredential.user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        // New user, set default role
-        await setDoc(userRef, {
-          email: userCredential.user.email,
-          name: userCredential.user.displayName,
-          role: "guest",
-          createdAt: new Date(),
-        });
-      }
-
-      const role = await getUserRole(userCredential.user.uid);
-      setUserRole(role);
-    } catch (error) {
-      console.error("Error logging in with Google:", error);
-      throw error;
-    }
-  }
-
-  async function signup(email, password, name) {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-
-      // Create user document
-      const userRef = doc(db, "users", userCredential.user.uid);
-      await setDoc(userRef, {
-        email,
-        name,
-        role: "guest",
-        createdAt: new Date(),
-      });
-
-      setUserRole("guest");
-    } catch (error) {
-      console.error("Error signing up:", error);
-      throw error;
-    }
-  }
-  
-  async function signupWithGoogle(){
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const userCredential = result.user;
-      const userRef = doc(db, "users", userCredential.uid);
-      if (!userRef.exists()) {
-        // New user, set default role
-        await setDoc(userRef, {
-          email: userCredential.email,
-          name: userCredential.displayName,
-          role: "guest",
-          createdAt: new Date(),
-          });
-        }
-        setUserRole("guest");
-      } catch (error) {
-        toast.error("Error signing up with Google:", error);
-        throw error;
-      }
-  }
-
-  async function logout() {
-    try {
-      await signOut(auth);
-      setUserRole(null);
-    } catch (error) {
-      console.error("Error logging out:", error);
-      throw error;
-    }
-  }
+  };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      if (user) {
-        const role = await getUserRole(user.uid);
-        setUserRole(role);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        const role = await fetchUserRole(currentUser.uid);
+        setUser({
+          ...currentUser,
+          role
+        });
       } else {
-        setUserRole(null);
+        setUser(null);
       }
       setLoading(false);
     });
 
-    return unsubscribe;
-  }, []);
+    return () => unsubscribe();
+  }, [auth]);
+
+  const signIn = async (email, password) => {
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      const role = await fetchUserRole(result.user.uid);
+      return { ...result, user: { ...result.user, role } };
+    } catch (error) {
+      console.error("Sign in error:", error);
+      throw error;
+    }
+  };
+
+  const signUp = async (email, password, name) => {
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Create user document in Firestore
+      await setDoc(doc(db, "users", result.user.uid), {
+        name,
+        email,
+        role: "user", // Default role
+        createdAt: new Date()
+      });
+      
+      return result;
+    } catch (error) {
+      console.error("Sign up error:", error);
+      throw error;
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      
+      // Check if user document exists, if not create it
+      const userDoc = await getDoc(doc(db, "users", result.user.uid));
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, "users", result.user.uid), {
+          name: result.user.displayName,
+          email: result.user.email,
+          role: "user", // Default role
+          createdAt: new Date()
+        });
+      }
+      
+      const role = await fetchUserRole(result.user.uid);
+      return { ...result, user: { ...result.user, role } };
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      throw error;
+    }
+  };
+
+  const setUserRole = async (role) => {
+    if (!user) return;
+    
+    try {
+      await setDoc(doc(db, "users", user.uid), { role }, { merge: true });
+      setUser({ ...user, role });
+      return true;
+    } catch (error) {
+      console.error("Error setting user role:", error);
+      throw error;
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await firebaseSignOut(auth);
+    } catch (error) {
+      console.error("Sign out error:", error);
+      throw error;
+    }
+  };
 
   const value = {
-    currentUser,
-    userRole,
-    loading,
-    login,
-    loginWithGoogle,
-    signup,
-    logout,
+    user,
+    signIn,
+    signUp,
+    signInWithGoogle,
+    signOut,
+    setUserRole,
+    loading
   };
 
   return (
@@ -170,4 +144,4 @@ export function AuthProvider({ children }) {
       {!loading && children}
     </AuthContext.Provider>
   );
-}
+};

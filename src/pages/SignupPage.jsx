@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/firebase/auth-context";
 import { useToast } from "@/hooks/use-toast";
@@ -11,9 +11,17 @@ const SignupPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signup, loginWithGoogle } = useAuth();
+  const { user, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      console.log("User already logged in, redirecting to dashboard");
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -48,7 +56,7 @@ const SignupPage = () => {
     setLoading(true);
 
     try {
-      await signup(email, password, name);
+      await signUp(email, password, name);
       toast({
         title: "Success",
         description: "Your account has been created successfully!",
@@ -70,7 +78,7 @@ const SignupPage = () => {
     setLoading(true);
 
     try {
-      await loginWithGoogle();
+      await signInWithGoogle();
       toast({
         title: "Success",
         description: "You have been signed up with Google successfully.",
@@ -89,15 +97,15 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen dark:bg-slate-950"> {/* Added dark bg to main container */}
+    <div className="flex flex-col min-h-screen dark:bg-slate-950">
       <Navbar />
-      <main className="flex-grow"> {/* Added flex-grow to main content area */}
-        <div className="min-h-[calc(100vh-10rem)] py-12 md:py-16 flex items-center justify-center bg-gray-50 dark:bg-slate-950"> {/* Adjusted min-height and padding */}
-          <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-lg shadow-xl w-full max-w-md dark:shadow-slate-800"> {/* Adjusted padding and shadow */}
+      <main className="flex-grow">
+        <div className="min-h-[calc(100vh-10rem)] py-12 md:py-16 flex items-center justify-center bg-gray-50 dark:bg-slate-950">
+          <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-lg shadow-xl w-full max-w-md dark:shadow-slate-800">
             <h2 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-white">
               Create Account
             </h2>
-            <form onSubmit={handleSignup} className="space-y-5"> {/* Increased space-y */}
+            <form onSubmit={handleSignup} className="space-y-5">
               <div>
                 <label
                   htmlFor="name"
@@ -110,8 +118,8 @@ const SignupPage = () => {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-hotel-500 dark:focus:ring-hotel-400 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  placeholder="John Doe"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-hotel-500 dark:bg-slate-800 dark:text-white"
+                  placeholder="Enter your full name"
                   required
                 />
               </div>
@@ -120,15 +128,15 @@ const SignupPage = () => {
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
-                  Email Address
+                  Email
                 </label>
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-hotel-500 dark:focus:ring-hotel-400 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  placeholder="your@email.com"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-hotel-500 dark:bg-slate-800 dark:text-white"
+                  placeholder="Enter your email"
                   required
                 />
               </div>
@@ -144,8 +152,8 @@ const SignupPage = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-hotel-500 dark:focus:ring-hotel-400 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  placeholder="••••••••"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-hotel-500 dark:bg-slate-800 dark:text-white"
+                  placeholder="Enter your password"
                   required
                   minLength={6}
                 />
@@ -162,8 +170,8 @@ const SignupPage = () => {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-hotel-500 dark:focus:ring-hotel-400 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  placeholder="••••••••"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-hotel-500 dark:bg-slate-800 dark:text-white"
+                  placeholder="Confirm your password"
                   required
                 />
               </div>

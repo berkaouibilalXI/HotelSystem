@@ -1,257 +1,316 @@
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  getDocs,
-  getDoc,
-  query,
-  where,
-  serverTimestamp,
-} from "firebase/firestore";
 import { db } from "./config";
+import { 
+  collection, 
+  doc, 
+  getDocs, 
+  getDoc, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  query, 
+  where, 
+  orderBy, 
+  serverTimestamp 
+} from "firebase/firestore";
 
-// Room operations
-export async function addRoom(room) {
+// Room functions
+export const getRooms = async () => {
   try {
-    const docRef = await addDoc(collection(db, "rooms"), {
-      ...room,
-      createdAt: serverTimestamp(),
-    });
-    return { ...room, id: docRef.id };
-  } catch (error) {
-    console.error("Error adding room:", error);
-    throw error;
-  }
-}
-
-export async function updateRoom(id, room) {
-  try {
-    const roomRef = doc(db, "rooms", id);
-    await updateDoc(roomRef, room);
-    return { id, ...room };
-  } catch (error) {
-    console.error("Error updating room:", error);
-    throw error;
-  }
-}
-
-export async function deleteRoom(id) {
-  try {
-    await deleteDoc(doc(db, "rooms", id));
-    return id;
-  } catch (error) {
-    console.error("Error deleting room:", error);
-    throw error;
-  }
-}
-
-export async function getRooms() {
-  try {
-    const querySnapshot = await getDocs(collection(db, "rooms"));
-    return querySnapshot.docs.map((doc) => ({
+    const roomsCollection = collection(db, "rooms");
+    const roomsSnapshot = await getDocs(roomsCollection);
+    return roomsSnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc.data()
     }));
   } catch (error) {
     console.error("Error getting rooms:", error);
     throw error;
   }
-}
+};
 
-export async function getRoom(id) {
+export const getRoom = async (id) => {
   try {
-    const docRef = doc(db, "rooms", id);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() };
+    const roomDoc = doc(db, "rooms", id);
+    const roomSnapshot = await getDoc(roomDoc);
+    if (roomSnapshot.exists()) {
+      return {
+        id: roomSnapshot.id,
+        ...roomSnapshot.data()
+      };
     } else {
-      throw new Error("Room not found");
+      return null;
     }
   } catch (error) {
     console.error("Error getting room:", error);
     throw error;
   }
-}
+};
 
-export async function getRoomsByType(type) {
+export const addRoom = async (roomData) => {
   try {
-    const roomsQuery = query(
-      collection(db, "rooms"),
-      where("type", "==", type),
-    );
-
-    const querySnapshot = await getDocs(roomsQuery);
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-  } catch (error) {
-    console.error("Error getting rooms by type:", error);
-    throw error;
-  }
-}
-
-// Booking operations
-export async function addBooking(booking) {
-  try {
-    const docRef = await addDoc(collection(db, "bookings"), {
-      ...booking,
-      createdAt: serverTimestamp(),
+    const roomsCollection = collection(db, "rooms");
+    const docRef = await addDoc(roomsCollection, {
+      ...roomData,
+      createdAt: serverTimestamp()
     });
-    return { ...booking, id: docRef.id };
+    return docRef.id;
   } catch (error) {
-    console.error("Error adding booking:", error);
+    console.error("Error adding room:", error);
     throw error;
   }
-}
+};
 
-export async function updateBooking(id, booking) {
+export const updateRoom = async (id, roomData) => {
   try {
-    const bookingRef = doc(db, "bookings", id);
-    await updateDoc(bookingRef, booking);
-    return { id, ...booking };
+    const roomDoc = doc(db, "rooms", id);
+    await updateDoc(roomDoc, {
+      ...roomData,
+      updatedAt: serverTimestamp()
+    });
+    return true;
   } catch (error) {
-    console.error("Error updating booking:", error);
+    console.error("Error updating room:", error);
     throw error;
   }
-}
+};
 
-export async function getBookings() {
+export const deleteRoom = async (id) => {
   try {
-    const querySnapshot = await getDocs(collection(db, "bookings"));
-    return querySnapshot.docs.map((doc) => ({
+    const roomDoc = doc(db, "rooms", id);
+    await deleteDoc(roomDoc);
+    return true;
+  } catch (error) {
+    console.error("Error deleting room:", error);
+    throw error;
+  }
+};
+
+// Booking functions
+export const getBookings = async () => {
+  try {
+    const bookingsCollection = collection(db, "bookings");
+    const q = query(bookingsCollection, orderBy("createdAt", "desc"));
+    const bookingsSnapshot = await getDocs(q);
+    return bookingsSnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc.data()
     }));
   } catch (error) {
     console.error("Error getting bookings:", error);
     throw error;
   }
-}
+};
 
-export async function getBookingsByStatus(status) {
+export const getBooking = async (id) => {
   try {
-    const bookingsQuery = query(
-      collection(db, "bookings"),
-      where("status", "==", status),
-    );
+    const bookingDoc = doc(db, "bookings", id);
+    const bookingSnapshot = await getDoc(bookingDoc);
+    if (bookingSnapshot.exists()) {
+      return {
+        id: bookingSnapshot.id,
+        ...bookingSnapshot.data()
+      };
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting booking:", error);
+    throw error;
+  }
+};
 
-    const querySnapshot = await getDocs(bookingsQuery);
-    return querySnapshot.docs.map((doc) => ({
+export const addBooking = async (bookingData) => {
+  try {
+    const bookingsCollection = collection(db, "bookings");
+    const docRef = await addDoc(bookingsCollection, {
+      ...bookingData,
+      createdAt: serverTimestamp()
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding booking:", error);
+    throw error;
+  }
+};
+
+export const updateBookingStatus = async (id, status) => {
+  try {
+    const bookingDoc = doc(db, "bookings", id);
+    await updateDoc(bookingDoc, {
+      status,
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error("Error updating booking status:", error);
+    throw error;
+  }
+};
+
+export const deleteBooking = async (id) => {
+  try {
+    const bookingDoc = doc(db, "bookings", id);
+    await deleteDoc(bookingDoc);
+    return true;
+  } catch (error) {
+    console.error("Error deleting booking:", error);
+    throw error;
+  }
+};
+
+// Review functions
+export const getReviews = async () => {
+  try {
+    const reviewsCollection = collection(db, "reviews");
+    const q = query(reviewsCollection, orderBy("createdAt", "desc"));
+    const reviewsSnapshot = await getDocs(q);
+    return reviewsSnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc.data()
     }));
   } catch (error) {
-    console.error("Error getting bookings by status:", error);
+    console.error("Error getting reviews:", error);
     throw error;
   }
-}
+};
 
-// Review operations
-export async function addReview(review) {
+export const getApprovedReviews = async () => {
   try {
-    const docRef = await addDoc(collection(db, "reviews"), {
-      ...review,
-      approved: false,
-      createdAt: serverTimestamp(),
-    });
-    return { ...review, id: docRef.id };
-  } catch (error) {
-    console.error("Error adding review:", error);
-    throw error;
-  }
-}
-
-export async function updateReview(id, review) {
-  try {
-    const reviewRef = doc(db, "reviews", id);
-    await updateDoc(reviewRef, review);
-    return { id, ...review };
-  } catch (error) {
-    console.error("Error updating review:", error);
-    throw error;
-  }
-}
-
-export async function deleteReview(id) {
-  try {
-    await deleteDoc(doc(db, "reviews", id));
-    return id;
-  } catch (error) {
-    console.error("Error deleting review:", error);
-    throw error;
-  }
-}
-
-export async function getApprovedReviews() {
-  try {
-    const reviewsQuery = query(
-      collection(db, "reviews"),
+    const reviewsCollection = collection(db, "reviews");
+    const q = query(
+      reviewsCollection, 
       where("approved", "==", true),
+      orderBy("createdAt", "desc")
     );
-
-    const querySnapshot = await getDocs(reviewsQuery);
-    return querySnapshot.docs.map((doc) => ({
+    const reviewsSnapshot = await getDocs(q);
+    return reviewsSnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc.data()
     }));
   } catch (error) {
     console.error("Error getting approved reviews:", error);
     throw error;
   }
-}
+};
 
-export async function getAllReviews() {
+export const updateReviewStatus = async (id, approved) => {
   try {
-    const querySnapshot = await getDocs(collection(db, "reviews"));
-    return querySnapshot.docs.map((doc) => ({
+    const reviewDoc = doc(db, "reviews", id);
+    await updateDoc(reviewDoc, {
+      approved,
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error("Error updating review status:", error);
+    throw error;
+  }
+};
+
+export const deleteReview = async (id) => {
+  try {
+    const reviewDoc = doc(db, "reviews", id);
+    await deleteDoc(reviewDoc);
+    return true;
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    throw error;
+  }
+};
+
+// Message functions
+export const getMessages = async () => {
+  try {
+    const messagesCollection = collection(db, "messages");
+    const q = query(messagesCollection, orderBy("createdAt", "desc"));
+    const messagesSnapshot = await getDocs(q);
+    return messagesSnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc.data()
     }));
   } catch (error) {
-    console.error("Error getting all reviews:", error);
+    console.error("Error getting messages:", error);
     throw error;
   }
-}
+};
 
-// Contact message operations
-export async function addContactMessage(message) {
+export const getContactMessages = async () => {
   try {
-    const docRef = await addDoc(collection(db, "contactMessages"), {
-      ...message,
-      read: false,
-      createdAt: serverTimestamp(),
-    });
-    return { ...message, id: docRef.id };
-  } catch (error) {
-    console.error("Error adding contact message:", error);
-    throw error;
-  }
-}
-
-export async function markMessageAsRead(id) {
-  try {
-    const messageRef = doc(db, "contactMessages", id);
-    await updateDoc(messageRef, { read: true });
-    return id;
-  } catch (error) {
-    console.error("Error marking message as read:", error);
-    throw error;
-  }
-}
-
-export async function getContactMessages() {
-  try {
-    const querySnapshot = await getDocs(collection(db, "contactMessages"));
-    return querySnapshot.docs.map((doc) => ({
+    const messagesCollection = collection(db, "messages");
+    const q = query(messagesCollection, orderBy("createdAt", "desc"));
+    const messagesSnapshot = await getDocs(q);
+    return messagesSnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc.data()
     }));
   } catch (error) {
     console.error("Error getting contact messages:", error);
     throw error;
   }
-}
+};
+
+export const markMessageAsRead = async (id, isRead = true) => {
+  try {
+    const messageDoc = doc(db, "messages", id);
+    await updateDoc(messageDoc, {
+      read: isRead,
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error("Error marking message as read:", error);
+    throw error;
+  }
+};
+
+export const deleteMessage = async (id) => {
+  try {
+    const messageDoc = doc(db, "messages", id);
+    await deleteDoc(messageDoc);
+    return true;
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    throw error;
+  }
+};
+
+export const addContactMessage = async (messageData) => {
+  try {
+    const messagesCollection = collection(db, "messages");
+    const docRef = await addDoc(messagesCollection, {
+      ...messageData,
+      read: false,
+      createdAt: serverTimestamp()
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding contact message:", error);
+    throw error;
+  }
+};
+
+// User role management functions
+export const setUserRole = async (userId, role) => {
+  try {
+    const userRef = doc(db, "users", userId);
+    await setDoc(userRef, { role }, { merge: true });
+    return true;
+  } catch (error) {
+    console.error("Error setting user role:", error);
+    throw error;
+  }
+};
+
+export const getUserRole = async (userId) => {
+  try {
+    const userRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userRef);
+    if (userDoc.exists()) {
+      return userDoc.data().role;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting user role:", error);
+    throw error;
+  }
+};

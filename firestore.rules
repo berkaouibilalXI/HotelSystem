@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Allow users to read and write their own documents
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      
+      // Allow admins to read and write all user documents
+      allow read, write: if isAdmin();
+      
+      // For development/testing only - remove in production
+      allow read, write: if isSignedIn();
+    }
+    
+    // Default rule - deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

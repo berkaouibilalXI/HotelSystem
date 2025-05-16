@@ -59,10 +59,10 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gray-100">
+      <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
         <DashboardSidebar />
-        <div className="flex-1 ml-64">
-          <div className="p-8 flex justify-center items-center h-screen">
+        <div className="flex-1 md:ml-64">
+          <div className="p-4 md:p-8 flex justify-center items-center h-screen">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-hotel-600"></div>
           </div>
         </div>
@@ -71,13 +71,13 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
       <DashboardSidebar />
-      <div className="flex-1 ml-64">
-        <div className="p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-            <div className="text-sm text-gray-500">
+      <div className="flex-1 md:ml-64 pt-16 md:pt-0">
+        <div className="p-4 md:p-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 md:mb-0">Dashboard</h1>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               {new Date().toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
@@ -87,49 +87,14 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Total Revenue</p>
-                  <h3 className="text-2xl font-bold text-gray-800">
-                    ${revenue.toFixed(2)}
-                  </h3>
-                </div>
-                <div className="bg-green-100 p-2 rounded-lg">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {/* Total Bookings */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900 mr-4">
                   <svg
-                    className="w-6 h-6 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                </div>
-              </div>
-              <p className="text-sm text-gray-500 mt-2">
-                From confirmed bookings
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Total Bookings</p>
-                  <h3 className="text-2xl font-bold text-gray-800">
-                    {totalBookings}
-                  </h3>
-                </div>
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <svg
-                    className="w-6 h-6 text-blue-600"
+                    className="h-8 w-8 text-blue-500 dark:text-blue-300"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -143,30 +108,70 @@ const DashboardPage = () => {
                     ></path>
                   </svg>
                 </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">
+                    Total Bookings
+                  </p>
+                  <p className="text-gray-800 dark:text-white text-2xl font-semibold">
+                    {totalBookings}
+                  </p>
+                </div>
               </div>
-              <div className="flex space-x-4 mt-2">
-                <p className="text-sm text-gray-500">
-                  <span className="inline-block w-3 h-3 mr-1 rounded-full bg-green-400"></span>
-                  {confirmedBookings} confirmed
-                </p>
-                <p className="text-sm text-gray-500">
-                  <span className="inline-block w-3 h-3 mr-1 rounded-full bg-yellow-400"></span>
-                  {pendingBookings} pending
-                </p>
+              <div className="mt-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-green-500 dark:text-green-400">
+                    {confirmedBookings} Confirmed
+                  </span>
+                  <span className="text-yellow-500 dark:text-yellow-400">
+                    {pendingBookings} Pending
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Available Rooms</p>
-                  <h3 className="text-2xl font-bold text-gray-800">
-                    {availableRooms}/{rooms.length}
-                  </h3>
-                </div>
-                <div className="bg-purple-100 p-2 rounded-lg">
+            {/* Revenue */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-full bg-green-100 dark:bg-green-900 mr-4">
                   <svg
-                    className="w-6 h-6 text-purple-600"
+                    className="h-8 w-8 text-green-500 dark:text-green-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">
+                    Revenue
+                  </p>
+                  <p className="text-gray-800 dark:text-white text-2xl font-semibold">
+                    ${revenue.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500 dark:text-gray-400">
+                    From {confirmedBookings} confirmed bookings
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Available Rooms */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-900 mr-4">
+                  <svg
+                    className="h-8 w-8 text-purple-500 dark:text-purple-300"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -180,146 +185,21 @@ const DashboardPage = () => {
                     ></path>
                   </svg>
                 </div>
-              </div>
-              <p className="text-sm text-gray-500 mt-2">
-                Occupancy rate:{" "}
-                {rooms.length > 0
-                  ? (
-                      ((rooms.length - availableRooms) / rooms.length) *
-                      100
-                    ).toFixed(0)
-                  : 0}
-                %
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Unread Messages</p>
-                  <h3 className="text-2xl font-bold text-gray-800">
-                    {unreadMessages}
-                  </h3>
-                </div>
-                <div className="bg-red-100 p-2 rounded-lg">
-                  <svg
-                    className="w-6 h-6 text-red-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    ></path>
-                  </svg>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">
+                    Available Rooms
+                  </p>
+                  <p className="text-gray-800 dark:text-white text-2xl font-semibold">
+                    {availableRooms}
+                  </p>
                 </div>
               </div>
-              <p className="text-sm text-gray-500 mt-2">
-                Total: {messages.length} messages
-              </p>
-            </div>
-          </div>
-
-          {/* Recent Bookings */}
-          <div className="bg-white rounded-lg shadow mb-8">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Recent Bookings
-              </h2>
-              <Link
-                to="/dashboard/bookings"
-                className="text-sm text-hotel-600 hover:text-hotel-700"
-              >
-                View all
-              </Link>
-            </div>
-            <div className="p-4">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Guest
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Room
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Check-in
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Check-out
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {bookings.slice(0, 5).map((booking) => (
-                      <tr key={booking.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {booking.guestName}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {booking.guestEmail}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {booking.roomName}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {booking.checkIn instanceof Date
-                              ? booking.checkIn.toLocaleDateString()
-                              : new Date(
-                                  booking.checkIn.seconds * 1000,
-                                ).toLocaleDateString()}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {booking.checkOut instanceof Date
-                              ? booking.checkOut.toLocaleDateString()
-                              : new Date(
-                                  booking.checkOut.seconds * 1000,
-                                ).toLocaleDateString()}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              booking.status === "confirmed"
-                                ? "bg-green-100 text-green-800"
-                                : booking.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            {booking.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                    {bookings.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={5}
-                          className="px-6 py-4 text-center text-gray-500"
-                        >
-                          No bookings found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+              <div className="mt-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500 dark:text-gray-400">
+                    Out of {rooms.length} total rooms
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -327,20 +207,20 @@ const DashboardPage = () => {
           {/* Bottom Grid - Quick Actions & Recent Reviews */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-800">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
                   Quick Actions
                 </h2>
               </div>
               <div className="p-6 grid grid-cols-2 gap-4">
                 <Link
                   to="/dashboard/rooms/new"
-                  className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex flex-col items-center justify-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <div className="bg-hotel-100 p-3 rounded-full mb-3">
+                  <div className="bg-hotel-100 dark:bg-hotel-900 p-3 rounded-full mb-3">
                     <svg
-                      className="w-6 h-6 text-hotel-600"
+                      className="w-6 h-6 text-hotel-600 dark:text-hotel-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -354,18 +234,18 @@ const DashboardPage = () => {
                       ></path>
                     </svg>
                   </div>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Add Room
                   </span>
                 </Link>
 
                 <Link
                   to="/dashboard/bookings/new"
-                  className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex flex-col items-center justify-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <div className="bg-hotel-100 p-3 rounded-full mb-3">
+                  <div className="bg-hotel-100 dark:bg-hotel-900 p-3 rounded-full mb-3">
                     <svg
-                      className="w-6 h-6 text-hotel-600"
+                      className="w-6 h-6 text-hotel-600 dark:text-hotel-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -379,18 +259,18 @@ const DashboardPage = () => {
                       ></path>
                     </svg>
                   </div>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     New Booking
                   </span>
                 </Link>
 
                 <Link
-                  to="/dashboard/reviews"
-                  className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  to="/dashboard/settings"
+                  className="flex flex-col items-center justify-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <div className="bg-hotel-100 p-3 rounded-full mb-3">
+                  <div className="bg-hotel-100 dark:bg-hotel-900 p-3 rounded-full mb-3">
                     <svg
-                      className="w-6 h-6 text-hotel-600"
+                      className="w-6 h-6 text-hotel-600 dark:text-hotel-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -404,18 +284,18 @@ const DashboardPage = () => {
                       ></path>
                     </svg>
                   </div>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Manage Reviews
                   </span>
                 </Link>
 
                 <Link
                   to="/dashboard/messages"
-                  className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex flex-col items-center justify-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <div className="bg-hotel-100 p-3 rounded-full mb-3">
+                  <div className="bg-hotel-100 dark:bg-hotel-900 p-3 rounded-full mb-3">
                     <svg
-                      className="w-6 h-6 text-hotel-600"
+                      className="w-6 h-6 text-hotel-600 dark:text-hotel-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -429,7 +309,7 @@ const DashboardPage = () => {
                       ></path>
                     </svg>
                   </div>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     View Messages
                   </span>
                 </Link>
@@ -437,9 +317,9 @@ const DashboardPage = () => {
             </div>
 
             {/* Recent Reviews */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-800">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
                   Recent Reviews
                 </h2>
                 <Link
@@ -457,7 +337,7 @@ const DashboardPage = () => {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <h4 className="font-medium text-gray-800">
+                        <h4 className="font-medium text-gray-800 dark:text-white">
                           {review.name}
                         </h4>
                         <div className="flex items-center">
@@ -472,12 +352,12 @@ const DashboardPage = () => {
                               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                             </svg>
                           ))}
-                          <span className="ml-1 text-xs text-gray-500">
+                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">
                             {review.rating}/5
                           </span>
                         </div>
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
                         {review.createdAt
                           ? new Date(
                               review.createdAt.seconds * 1000,
@@ -485,7 +365,7 @@ const DashboardPage = () => {
                           : ""}
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600">{review.comment}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{review.comment}</p>
                   </div>
                 ))}
                 {reviews.length === 0 && (

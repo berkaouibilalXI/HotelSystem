@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { currentUser, userRole, logout } = useAuth();
+  const { user, signOut } = useAuth();  // Updated from currentUser to user and logout to signOut
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -14,7 +14,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -119,9 +119,9 @@ const Navbar = () => {
             >
               Contact
             </Link>
-            {currentUser ? (
+            {user ? (
               <>
-                {userRole && (userRole === "admin" || userRole === "staff") && (
+                {user.role && (user.role === "admin" || user.role === "staff") && (
                   <Link
                     to="/dashboard"
                     className="text-gray-700 hover:text-hotel-600 transition-colors dark:text-gray-300 dark:hover:text-white"
@@ -228,9 +228,9 @@ const Navbar = () => {
                 </motion.div>
               ))}
 
-              {currentUser ? (
+              {user ? (
                 <>
-                  {userRole && (userRole === "admin" || userRole === "staff") && (
+                  {user.role && (user.role === "admin" || user.role === "staff") && (
                     <motion.div variants={menuItemVariants}>
                       <Link
                         to="/dashboard"
