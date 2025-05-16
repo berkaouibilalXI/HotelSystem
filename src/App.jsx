@@ -22,11 +22,6 @@ import RoomDetailPage from "@/pages/RoomDetailPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import BookNowPage from "./pages/BookNowPage";
-// import RoomsPage from "./pages/RoomsPage";
-// import RoomDetailPage from "./pages/RoomDetailPage";
-// import AboutPage from "./pages/AboutPage";
-// import ContactPage from "./pages/ContactPage";
-// import BookNowPage from "./pages/BookNowPage";
 
 
 
