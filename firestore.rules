@@ -10,21 +10,25 @@ service cloud.firestore {
       return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
     }
     
-    // Users collection
-    match /users/{userId} {
-      // Allow users to read and write their own documents
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
-      
-      // Allow admins to read and write all user documents
-      allow read, write: if isAdmin();
-      
-      // For development/testing only - remove in production
-      allow read, write: if isSignedIn();
+    function isStaff() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "staff";
     }
     
-    // Default rule - deny all other access
+    // Rooms collection
+    match /rooms/{roomId} {
+      allow read: if true;
+      allow write: if isAdmin() || isStaff();
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+    
+    // Default rule
     match /{document=**} {
-      allow read, write: if false;
+      allow read, write: if isAdmin();
     }
   }
 }

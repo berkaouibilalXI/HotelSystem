@@ -1,19 +1,22 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getRoom, addRoom, updateRoom } from "@/firebase/firestore";
+import { getRoom, addRoom, updateRoom, deleteRoom } from "@/firebase/firestore";
 import { uploadImage, deleteImage } from "@/firebase/storage";
 import DashboardSidebar from "@/components/admin/DashboardSidebar";
 import { toast } from "sonner";
+import { useAuth } from "@/firebase/auth-context"; // Import auth context
 
 const RoomFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = !!id;
+  const { user } = useAuth(); // Get current user
   
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
+  const [imageUrl, setImageUrl] = useState(""); // New state for image URL input
   
   const [formData, setFormData] = useState({
     name: "",
@@ -102,6 +105,33 @@ const RoomFormPage = () => {
     setImagePreviewUrls([...imagePreviewUrls, ...newPreviewUrls]);
   };
 
+  const handleAddImageUrl = () => {
+    if (!imageUrl) {
+      toast.error("Please enter a valid image URL");
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(imageUrl);
+    } catch (e) {
+      toast.error("Please enter a valid URL");
+      return;
+    }
+
+    // Add URL to preview and form data
+    setImagePreviewUrls([...imagePreviewUrls, imageUrl]);
+    setFormData({
+      ...formData,
+      images: [...formData.images, imageUrl]
+    });
+    
+    // Clear the input
+    setImageUrl("");
+    
+    toast.success("Image URL added");
+  };
+
   const removeImage = (index) => {
     // If it's a new image (from imageFiles)
     if (index < imageFiles.length) {
@@ -129,6 +159,31 @@ const RoomFormPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if user is authenticated and has proper role
+    if (!user) {
+      toast.error("You must be logged in to perform this action");
+      navigate("/login");
+      return;
+    }
+    
+    if (user.role !== "admin" && user.role !== "staff") {
+      toast.error("You don't have permission to perform this action");
+      return;
+    }
+    
+    // Validate form data
+    if (!formData.name || !formData.description || formData.price <= 0) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    
+    // Validate that there's at least one image (either from files or URLs)
+    if (imageFiles.length === 0 && formData.images.length === 0) {
+      toast.error("Please add at least one image");
+      return;
+    }
+    
     setSubmitting(true);
 
     try {
@@ -136,11 +191,18 @@ const RoomFormPage = () => {
       
       // Upload new images if any
       if (imageFiles.length > 0) {
-        const uploadPromises = imageFiles.map(file => uploadImage(file, `rooms/${Date.now()}_${file.name}`));
-        const uploadedImageUrls = await Promise.all(uploadPromises);
-        
-        // Combine with existing images
-        updatedFormData.images = [...(formData.images || []), ...uploadedImageUrls];
+        try {
+          const uploadPromises = imageFiles.map(file => uploadImage(file, `rooms/${Date.now()}_${file.name}`));
+          const uploadedImageUrls = await Promise.all(uploadPromises);
+          
+          // Combine with existing images
+          updatedFormData.images = [...(formData.images || []), ...uploadedImageUrls];
+        } catch (uploadError) {
+          console.error("Error uploading images:", uploadError);
+          toast.error(`Failed to upload images: ${uploadError.message}`);
+          setSubmitting(false);
+          return;
+        }
       }
 
       if (isEditMode) {
@@ -154,7 +216,12 @@ const RoomFormPage = () => {
       navigate("/dashboard/rooms");
     } catch (error) {
       console.error("Error saving room:", error);
-      toast.error("Failed to save room");
+      // More specific error message
+      if (error.code) {
+        toast.error(`Failed to save room: ${error.code}`);
+      } else {
+        toast.error(`Failed to save room: ${error.message || "Unknown error"}`);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -343,16 +410,45 @@ const RoomFormPage = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Room Images
                 </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageChange}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-hotel-50 file:text-hotel-700 hover:file:bg-hotel-100 dark:text-gray-400 dark:file:bg-hotel-900 dark:file:text-hotel-300"
-                />
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  You can upload multiple images. Recommended size: 1200x800 pixels.
-                </p>
+                
+                {/* File upload */}
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Upload from device</p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-hotel-50 file:text-hotel-700 hover:file:bg-hotel-100 dark:text-gray-400 dark:file:bg-hotel-900 dark:file:text-hotel-300"
+                  />
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    You can upload multiple images. Recommended size: 1200x800 pixels.
+                  </p>
+                </div>
+                
+                {/* URL input */}
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Add from URL</p>
+                  <div className="flex">
+                    <input
+                      type="url"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      className="flex-1 border border-gray-300 dark:border-gray-700 rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddImageUrl}
+                      className="bg-hotel-600 hover:bg-hotel-700 text-white px-4 py-2 rounded-r-md transition-colors"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Enter a direct URL to an image (JPG, PNG, WebP formats).
+                  </p>
+                </div>
 
                 {/* Image Previews */}
                 {imagePreviewUrls.length > 0 && (

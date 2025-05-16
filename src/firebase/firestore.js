@@ -10,7 +10,8 @@ import {
   query, 
   where, 
   orderBy, 
-  serverTimestamp 
+  serverTimestamp,
+  setDoc
 } from "firebase/firestore";
 
 // Room functions
@@ -32,6 +33,7 @@ export const getRoom = async (id) => {
   try {
     const roomDoc = doc(db, "rooms", id);
     const roomSnapshot = await getDoc(roomDoc);
+    
     if (roomSnapshot.exists()) {
       return {
         id: roomSnapshot.id,
@@ -48,11 +50,18 @@ export const getRoom = async (id) => {
 
 export const addRoom = async (roomData) => {
   try {
-    const roomsCollection = collection(db, "rooms");
-    const docRef = await addDoc(roomsCollection, {
+    // Ensure the data is properly formatted
+    const formattedData = {
       ...roomData,
+      price: Number(roomData.price),
+      capacity: Number(roomData.capacity),
+      size: Number(roomData.size),
+      available: Boolean(roomData.available),
       createdAt: serverTimestamp()
-    });
+    };
+    
+    const roomsCollection = collection(db, "rooms");
+    const docRef = await addDoc(roomsCollection, formattedData);
     return docRef.id;
   } catch (error) {
     console.error("Error adding room:", error);
@@ -62,11 +71,18 @@ export const addRoom = async (roomData) => {
 
 export const updateRoom = async (id, roomData) => {
   try {
-    const roomDoc = doc(db, "rooms", id);
-    await updateDoc(roomDoc, {
+    // Ensure the data is properly formatted
+    const formattedData = {
       ...roomData,
+      price: Number(roomData.price),
+      capacity: Number(roomData.capacity),
+      size: Number(roomData.size),
+      available: Boolean(roomData.available),
       updatedAt: serverTimestamp()
-    });
+    };
+    
+    const roomDoc = doc(db, "rooms", id);
+    await updateDoc(roomDoc, formattedData);
     return true;
   } catch (error) {
     console.error("Error updating room:", error);
@@ -311,6 +327,50 @@ export const getUserRole = async (userId) => {
     return null;
   } catch (error) {
     console.error("Error getting user role:", error);
+    throw error;
+  }
+};
+
+// Site settings functions
+export const getSiteSettings = async () => {
+  try {
+    const settingsDoc = doc(db, "settings", "site");
+    const settingsSnapshot = await getDoc(settingsDoc);
+    
+    if (settingsSnapshot.exists()) {
+      return settingsSnapshot.data();
+    } else {
+      // Return default settings if not found
+      return {
+        siteTitle: "B-Hotel",
+        siteDescription: "Luxury hotel booking platform",
+        contactEmail: "info@b-hotel.com",
+        contactPhone: "+1 (555) 123-4567",
+        address: "123 Hotel Street, City, Country",
+        socialLinks: {
+          facebook: "https://facebook.com/bhotel",
+          twitter: "https://twitter.com/bhotel",
+          instagram: "https://instagram.com/bhotel",
+        },
+        footerText: "© 2023 B-Hotel. All rights reserved.",
+      };
+    }
+  } catch (error) {
+    console.error("Error getting site settings:", error);
+    throw error;
+  }
+};
+
+export const updateSiteSettings = async (settingsData) => {
+  try {
+    const settingsDoc = doc(db, "settings", "site");
+    await setDoc(settingsDoc, {
+      ...settingsData,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    return true;
+  } catch (error) {
+    console.error("Error updating site settings:", error);
     throw error;
   }
 };
