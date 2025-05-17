@@ -76,8 +76,8 @@ const RoomsList = () => {
       id="rooms"
     >
       <div className="text-center mb-12" data-aos="fade-up">
-        <h2 className="text-3xl font-bold mb-3 dark:text-white">
-          Elegant Accommodations
+        <h2 className="text-3xl font-bold mb-3 dark:text-white uppercase">
+          Our Rooms
         </h2>
         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
           Choose from our selection of luxurious rooms, each designed for
@@ -123,25 +123,25 @@ const RoomsList = () => {
           </button>
           <button
             onClick={() => setFilter("suite")}
-            className={`px-4 py-2 text-sm font-medium rounded-r-md ${
+            className={`px-4 py-2 text-sm font-medium ${
               filter === "suite"
                 ? "bg-hotel-600 text-white dark:bg-hotel-700"
                 : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-            } border border-gray-200 dark:border-gray-700`}
+            } border-t border-b border-gray-200 dark:border-gray-700`}
           >
             Suite
           </button>
           <button
             onClick={() => setFilter("family")}
-            className={`px-4 py-2 text-sm font-medium rounded-r-md ${
+            className={`px-4 py-2 text-sm font-medium ${
               filter === "family"
                 ? "bg-hotel-600 text-white dark:bg-hotel-700"
                 : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-            } border border-gray-200 dark:border-gray-700`}
+            } border-t border-b border-gray-200 dark:border-gray-700`}
           >
             Family
           </button>
-          <button 
+          <button
             onClick={() => setFilter("executive")}
             className={`px-4 py-2 text-sm font-medium rounded-r-md ${
               filter === "executive"

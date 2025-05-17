@@ -253,7 +253,7 @@ const BookingForm = () => {
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
                   className="w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 dark:focus:ring-hotel-500 focus:border-transparent dark:focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500"
-                  placeholder="John Doe"
+                  placeholder="Your Name"
                   required
                 />
               </div>
@@ -267,7 +267,7 @@ const BookingForm = () => {
                   value={guestEmail}
                   onChange={(e) => setGuestEmail(e.target.value)}
                   className="w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 dark:focus:ring-hotel-500 focus:border-transparent dark:focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500"
-                  placeholder="john@example.com"
+                  placeholder="Your Email"
                   required
                 />
               </div>
@@ -281,7 +281,7 @@ const BookingForm = () => {
                   value={guestPhone}
                   onChange={(e) => setGuestPhone(e.target.value)}
                   className="w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hotel-600 dark:focus:ring-hotel-500 focus:border-transparent dark:focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500"
-                  placeholder="+1 (555) 123-4567"
+                  placeholder="+2137777777"
                   required
                 />
               </div>

@@ -85,7 +85,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
               <motion.span
-                className="text-2xl font-bold text-hotel-800 dark:text-white"
+                className="text-2xl font-bold text-hotel-800 dark:text-white uppercase"
                 whileHover={{ scale: 1.05 }}
               >
                 B-Hotel

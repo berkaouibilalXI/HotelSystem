@@ -33,7 +33,7 @@ const BookingDetailPage = () => {
   }, [id, navigate]);
 
   const handleStatusChange = async (newStatus) => {
-    if (window.confirm(`Are you sure you want to mark this booking as ${newStatus}?`)) {
+    if (toast.message(`Are you sure you want to mark this booking as ${newStatus}?`)) {
       setUpdating(true);
       try {
         await updateBookingStatus(id, newStatus);
