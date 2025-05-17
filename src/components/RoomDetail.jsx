@@ -20,6 +20,7 @@ import { fadeIn, fadeInUp } from "@/components/motion/animations"
 import { getRoom } from "@/firebase/firestore"
 import { toast } from "sonner"
 import { format } from "date-fns"
+import MapLocationPreview from "@/components/MapLocationPreview"
 
 // Fallback data in case Firestore fails
 const roomsData = [
@@ -275,6 +276,7 @@ const RoomDetail = () => {
                     <TabsTrigger value="description">Description</TabsTrigger>
                     <TabsTrigger value="amenities">Amenities</TabsTrigger>
                     <TabsTrigger value="policies">Policies</TabsTrigger>
+                    <TabsTrigger value="location">Location</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="description" className="space-y-4">
@@ -358,6 +360,45 @@ const RoomDetail = () => {
                           <li>No smoking</li>
                           <li>No parties or events</li>
                           <li>Pets not allowed</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="location" className="pt-6">
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-xl font-semibold mb-3 text-hotel-800 dark:text-white">Hotel Location</h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-4">
+                          Our hotel is conveniently located in the heart of downtown, just minutes away from major attractions, shopping centers, and restaurants.
+                        </p>
+                        
+                        <MapLocationPreview height="350px" />
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-xl font-semibold mb-3 text-hotel-800 dark:text-white">Nearby Attractions</h3>
+                        <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+                          <li className="flex items-start">
+                            <span className="text-hotel-600 dark:text-hotel-400 mr-2">•</span>
+                            <span><strong>City Center</strong> - 5 minutes walking distance</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-hotel-600 dark:text-hotel-400 mr-2">•</span>
+                            <span><strong>Beach Promenade</strong> - 10 minutes walking distance</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-hotel-600 dark:text-hotel-400 mr-2">•</span>
+                            <span><strong>Shopping District</strong> - 7 minutes walking distance</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-hotel-600 dark:text-hotel-400 mr-2">•</span>
+                            <span><strong>Historical Museum</strong> - 15 minutes walking distance</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-hotel-600 dark:text-hotel-400 mr-2">•</span>
+                            <span><strong>International Airport</strong> - 20 minutes by car</span>
+                          </li>
                         </ul>
                       </div>
                     </div>

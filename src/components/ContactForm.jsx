@@ -71,7 +71,7 @@ const ContactForm = () => {
             <div className="space-y-6">
               <div className="flex items-start">
                 <div className="bg-hotel-100 dark:bg-hotel-700 p-3 rounded-full mr-4">
-                  <MapPin color="#1c71d8" />
+                  <MapPin className="h-4 w-4 dark:text-gray-300 text-hotel-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg dark:text-gray-100">Address</h3>
@@ -83,7 +83,7 @@ const ContactForm = () => {
 
               <div className="flex items-start">
                 <div className="bg-hotel-100 dark:bg-hotel-700 p-3 rounded-full mr-4">
-                  <Mail color="#1c71d8" />
+                  <Mail className="h-4 w-4 dark:text-gray-300 text-hotel-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg dark:text-gray-100">Email</h3>
@@ -93,7 +93,7 @@ const ContactForm = () => {
 
               <div className="flex items-start">
                 <div className="bg-hotel-100 dark:bg-hotel-700 p-3 rounded-full mr-4">
-                  <Phone color="#1c71d8" />
+                  <Phone className="h-4 w-4 dark:text-gray-300 text-hotel-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg dark:text-gray-100">Phone</h3>
