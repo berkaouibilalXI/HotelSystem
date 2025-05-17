@@ -64,26 +64,26 @@ const Testimonials = () => {
   const sampleReviews = [
     {
       id: "sample-1",
-      name: "Sarah Johnson",
+      name: "Berkaoui Bilal",
       rating: 5,
       comment:
-        "The most elegant hotel I've ever stayed in. The staff went above and beyond to make our anniversary special!",
+        "I had a great time at this hotel. The staff was friendly and the room was clean.",
       approved: true,
     },
     {
       id: "sample-2",
-      name: "Michael Chen",
+      name: "Another Guest",
       rating: 5,
       comment:
-        "Pristine rooms, excellent service, and the restaurant was phenomenal. Will definitely return on my next business trip.",
+        "That was the best site ever. The staff was friendly and the room was clean.",
       approved: true,
     },
     {
       id: "sample-3",
-      name: "Emily Rodriguez",
+      name: "Algerian Dev",
       rating: 4,
       comment:
-        "Beautiful views from our suite and the spa services were top-notch. Highly recommend the couple's massage!",
+        "The website is awesome, highly recommended.",
       approved: true,
     },
   ];

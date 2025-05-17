@@ -131,6 +131,26 @@ const RoomsList = () => {
           >
             Suite
           </button>
+          <button
+            onClick={() => setFilter("family")}
+            className={`px-4 py-2 text-sm font-medium rounded-r-md ${
+              filter === "family"
+                ? "bg-hotel-600 text-white dark:bg-hotel-700"
+                : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+            } border border-gray-200 dark:border-gray-700`}
+          >
+            Family
+          </button>
+          <button 
+            onClick={() => setFilter("executive")}
+            className={`px-4 py-2 text-sm font-medium rounded-r-md ${
+              filter === "executive"
+                ? "bg-hotel-600 text-white dark:bg-hotel-700"
+                : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+            } border border-gray-200 dark:border-gray-700`}
+          >
+            Executive
+          </button>
         </div>
       </div>
 
