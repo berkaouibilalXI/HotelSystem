@@ -7,28 +7,52 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+      return isSignedIn() && request.auth.token.role == "admin";
     }
     
     function isStaff() {
-      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "staff";
+      return isSignedIn() && request.auth.token.role == "staff";
     }
     
     // Rooms collection
     match /rooms/{roomId} {
       allow read: if true;
-      allow write: if isAdmin() || isStaff();
+      allow write: if isSignedIn();
     }
     
     // Users collection
     match /users/{userId} {
-      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
-      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    // Images collection
+    match /images/{imageId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+    
+    // Bookings collection
+    match /bookings/{bookingId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+    
+    // Reviews collection
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+    
+    // Messages collection
+    match /messages/{messageId} {
+      allow read: if isSignedIn();
+      allow write: if true;
     }
     
     // Default rule
     match /{document=**} {
-      allow read, write: if isAdmin();
+      allow read, write: if isSignedIn();
     }
   }
 }

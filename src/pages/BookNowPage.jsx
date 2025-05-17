@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
+import { useLocation, useNavigate } from "react-router-dom"
 import {
   Popover,
   PopoverContent,
@@ -39,6 +40,8 @@ import {
   fadeInUp,
   staggerContainer
 } from "@/components/motion/animations"
+import { addBooking } from "@/firebase/firestore"
+import { useAuth } from "@/firebase/auth-context"
 
 const formSchema = z.object({
   firstName: z
@@ -58,37 +61,99 @@ const formSchema = z.object({
 })
 
 const BookNowPage = () => {
+  const { user } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [step, setStep] = useState(1)
+  
+  // Get room and date information from location state (if available)
+  const roomInfo = location.state || {}
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
+      firstName: user?.displayName?.split(' ')[0] || "",
+      lastName: user?.displayName?.split(' ').slice(1).join(' ') || "",
+      email: user?.email || "",
       phone: "",
-      roomType: "",
+      roomType: roomInfo.roomType || "",
+      checkInDate: roomInfo.checkInDate ? new Date(roomInfo.checkInDate) : undefined,
+      checkOutDate: roomInfo.checkOutDate ? new Date(roomInfo.checkOutDate) : undefined,
       adults: "1",
       children: "0",
       specialRequests: ""
     }
   })
 
-  const onSubmit = async data => {
-    setIsSubmitting(true)
+  // Set form values when roomInfo changes
+  useEffect(() => {
+    if (roomInfo.roomType) {
+      form.setValue("roomType", roomInfo.roomType);
+    }
+    if (roomInfo.checkInDate) {
+      form.setValue("checkInDate", new Date(roomInfo.checkInDate));
+    }
+    if (roomInfo.checkOutDate) {
+      form.setValue("checkOutDate", new Date(roomInfo.checkOutDate));
+    }
+  }, [roomInfo, form]);
 
-    // Simulate API call with timeout
-    setTimeout(() => {
-      console.log("Booking submitted:", data)
+  const onSubmit = async data => {
+    setIsSubmitting(true);
+
+    try {
+      // Calculate total price
+      const checkIn = data.checkInDate;
+      const checkOut = data.checkOutDate;
+      const nights = Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+      
+      // Get room price based on room type
+      let roomPrice = 0;
+      switch(data.roomType) {
+        case "standard": roomPrice = 180; break;
+        case "deluxe": roomPrice = 250; break;
+        case "suite": roomPrice = 350; break;
+        case "family": roomPrice = 400; break;
+        default: roomPrice = 200;
+      }
+      
+      const totalPrice = roomPrice * nights;
+      
+      // Create booking object
+      const booking = {
+        roomId: roomInfo.roomId || null,
+        roomName: roomInfo.roomName || data.roomType,
+        guestName: `${data.firstName} ${data.lastName}`,
+        guestEmail: data.email,
+        guestPhone: data.phone,
+        checkIn: data.checkInDate,
+        checkOut: data.checkOutDate,
+        adults: parseInt(data.adults),
+        children: parseInt(data.children),
+        specialRequests: data.specialRequests,
+        totalPrice: totalPrice,
+        status: "pending",
+        createdAt: new Date()
+      };
+      
+      // Add booking to Firestore
+      await addBooking(booking);
+      
       toast.success(
         "Booking submitted successfully! Check your email for confirmation."
-      )
-      form.reset()
-      setIsSubmitting(false)
-      setStep(1)
-    }, 2000)
-  }
+      );
+      
+      // Reset form and navigate to confirmation page
+      form.reset();
+      navigate("/booking-confirmation", { state: { booking } });
+    } catch (error) {
+      console.error("Error submitting booking:", error);
+      toast.error("Failed to submit booking. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const nextStep = async () => {
     const fieldsToValidate =

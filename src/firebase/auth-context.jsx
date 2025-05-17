@@ -6,16 +6,30 @@ import {
   signOut as firebaseSignOut,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  sendPasswordResetEmail
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { app } from "./config";
 import { db } from "./config";
+import { toast } from "sonner";
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   return useContext(AuthContext);
+};
+
+// Reset password function
+const resetPassword = async (email) => {
+  try {
+    const auth = getAuth(app);
+    await sendPasswordResetEmail(auth, email);
+    return true;
+  } catch (error) {
+    console.error("Password reset error:", error);
+    throw error;
+  }
 };
 
 export const AuthProvider = ({ children }) => {
@@ -37,13 +51,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        const role = await fetchUserRole(currentUser.uid);
-        setUser({
-          ...currentUser,
-          role
-        });
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          // Fetch user role from Firestore
+          const role = await fetchUserRole(user.uid);
+          console.log("User role from Firestore:", role);
+          setUser({ ...user, role });
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          setUser(user); // Set user without role if there's an error
+        }
       } else {
         setUser(null);
       }
@@ -51,12 +69,13 @@ export const AuthProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, []);
 
   const signIn = async (email, password) => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       const role = await fetchUserRole(result.user.uid);
+      console.log("User signed in with role:", role);
       return { ...result, user: { ...result.user, role } };
     } catch (error) {
       console.error("Sign in error:", error);
@@ -108,11 +127,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   const setUserRole = async (role) => {
-    if (!user) return;
+    if (!user) {
+      toast.error("No user is logged in");
+      return;
+    }
     
     try {
+      // Update role in Firestore
       await setDoc(doc(db, "users", user.uid), { role }, { merge: true });
+      
+      // Update local user state
       setUser({ ...user, role });
+      
+      console.log("User role updated to:", role);
       return true;
     } catch (error) {
       console.error("Error setting user role:", error);
@@ -131,12 +158,13 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    loading,
     signIn,
     signUp,
-    signInWithGoogle,
     signOut,
+    resetPassword,
     setUserRole,
-    loading
+    signInWithGoogle
   };
 
   return (

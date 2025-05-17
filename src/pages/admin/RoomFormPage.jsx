@@ -1,22 +1,24 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getRoom, addRoom, updateRoom, deleteRoom } from "@/firebase/firestore";
-import { uploadImage, deleteImage } from "@/firebase/storage";
+import { getRoom, addRoom, updateRoom } from "@/firebase/firestore";
 import DashboardSidebar from "@/components/admin/DashboardSidebar";
 import { toast } from "sonner";
-import { useAuth } from "@/firebase/auth-context"; // Import auth context
+import { useAuth } from "@/firebase/auth-context";
+import { compressImage, fileToBase64, uploadAllImages } from "@/utils/imageUtils";
+import RoleDebugger from "@/components/RoleDebugger";
+import FirestoreTest from "@/components/FirestoreTest";
 
 const RoomFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  const { user } = useAuth(); // Get current user
+  const { user } = useAuth();
   
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
-  const [imageUrl, setImageUrl] = useState(""); // New state for image URL input
+  const [imageUrl, setImageUrl] = useState("");
   
   const [formData, setFormData] = useState({
     name: "",
@@ -52,13 +54,14 @@ const RoomFormPage = () => {
       const fetchRoom = async () => {
         try {
           const roomData = await getRoom(id);
-          if (!roomData) {
+          if (roomData) {
+            setFormData(roomData);
+            // Set preview URLs for existing images
+            setImagePreviewUrls(roomData.images || []);
+          } else {
             toast.error("Room not found");
             navigate("/dashboard/rooms");
-            return;
           }
-          setFormData(roomData);
-          setImagePreviewUrls(roomData.images || []);
         } catch (error) {
           console.error("Error fetching room:", error);
           toast.error("Failed to load room data");
@@ -75,33 +78,40 @@ const RoomFormPage = () => {
     const { name, value, type, checked } = e.target;
     
     if (type === "checkbox") {
-      if (name === "amenities") {
-        const updatedAmenities = [...formData.amenities];
-        if (checked) {
-          updatedAmenities.push(value);
-        } else {
-          const index = updatedAmenities.indexOf(value);
-          if (index > -1) {
-            updatedAmenities.splice(index, 1);
-          }
-        }
-        setFormData({ ...formData, amenities: updatedAmenities });
-      } else {
-        setFormData({ ...formData, [name]: checked });
-      }
-    } else if (type === "number") {
-      setFormData({ ...formData, [name]: parseFloat(value) });
+      setFormData({ ...formData, [name]: checked });
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
-  const handleImageChange = (e) => {
+  const handleAmenityChange = (e) => {
+    const { value, checked } = e.target;
+    
+    if (checked) {
+      setFormData({
+        ...formData,
+        amenities: [...formData.amenities, value]
+      });
+    } else {
+      setFormData({
+        ...formData,
+        amenities: formData.amenities.filter(amenity => amenity !== value)
+      });
+    }
+  };
+
+  const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
     setImageFiles([...imageFiles, ...files]);
     
     // Create preview URLs
-    const newPreviewUrls = files.map(file => URL.createObjectURL(file));
+    const newPreviewUrls = await Promise.all(
+      files.map(async (file) => {
+        // Generate preview using base64
+        return await fileToBase64(file);
+      })
+    );
+    
     setImagePreviewUrls([...imagePreviewUrls, ...newPreviewUrls]);
   };
 
@@ -140,7 +150,6 @@ const RoomFormPage = () => {
       setImageFiles(newImageFiles);
       
       const newPreviewUrls = [...imagePreviewUrls];
-      URL.revokeObjectURL(newPreviewUrls[index]); // Clean up
       newPreviewUrls.splice(index, 1);
       setImagePreviewUrls(newPreviewUrls);
     } 
@@ -167,6 +176,9 @@ const RoomFormPage = () => {
       return;
     }
     
+    // Log user role for debugging
+    console.log("Current user role:", user.role);
+    
     if (user.role !== "admin" && user.role !== "staff") {
       toast.error("You don't have permission to perform this action");
       return;
@@ -192,8 +204,8 @@ const RoomFormPage = () => {
       // Upload new images if any
       if (imageFiles.length > 0) {
         try {
-          const uploadPromises = imageFiles.map(file => uploadImage(file, `rooms/${Date.now()}_${file.name}`));
-          const uploadedImageUrls = await Promise.all(uploadPromises);
+          // Simplified approach - just upload all images and get URLs
+          const uploadedImageUrls = await uploadAllImages(imageFiles);
           
           // Combine with existing images
           updatedFormData.images = [...(formData.images || []), ...uploadedImageUrls];
@@ -216,7 +228,6 @@ const RoomFormPage = () => {
       navigate("/dashboard/rooms");
     } catch (error) {
       console.error("Error saving room:", error);
-      // More specific error message
       if (error.code) {
         toast.error(`Failed to save room: ${error.code}`);
       } else {
@@ -391,7 +402,7 @@ const RoomFormPage = () => {
                         name="amenities"
                         value={amenity}
                         checked={formData.amenities.includes(amenity)}
-                        onChange={handleChange}
+                        onChange={handleAmenityChange}
                         className="h-4 w-4 text-hotel-600 focus:ring-hotel-500 border-gray-300 rounded dark:border-gray-600 dark:bg-gray-700"
                       />
                       <label

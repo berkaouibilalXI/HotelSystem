@@ -128,6 +128,18 @@ const DashboardSidebar = () => {
                     <span className="ml-3">{item.name}</span>
                   </Link>
                 ))}
+                
+                {/* Back to Home Link */}
+                <Link
+                  to="/"
+                  className="flex items-center px-4 py-3 mt-2 rounded-md text-gray-300 hover:bg-gray-700 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                  </svg>
+                  <span className="ml-3">Back to Home</span>
+                </Link>
               </nav>
               <div className="absolute bottom-0 w-full p-4 border-t border-gray-700">
                 <button
@@ -181,6 +193,17 @@ const DashboardSidebar = () => {
               <span className="ml-3">{item.name}</span>
             </Link>
           ))}
+          
+          {/* Back to Home Link */}
+          <Link
+            to="/"
+            className="flex items-center px-4 py-3 mt-2 rounded-md text-gray-300 hover:bg-gray-700 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span className="ml-3">Back to Home</span>
+          </Link>
         </nav>
         <div className="p-4 border-t border-gray-700">
           <button

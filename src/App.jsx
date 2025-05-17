@@ -22,6 +22,7 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import BookNowPage from "./pages/BookNowPage";
 import RoleDebugger from "./components/RoleDebugger";
+import BookingConfirmationPage from "@/pages/BookingConfirmationPage";
 
 // Admin Pages
 import DashboardPage from "./pages/admin/DashboardPage";
@@ -32,6 +33,7 @@ import AdminMessagesPage from "./pages/admin/MessagesPage";
 import RoomFormPage from "./pages/admin/RoomFormPage";
 import BookingFormPage from "./pages/admin/BookingFormPage";
 import BookingDetailPage from "./pages/admin/BookingDetailPage";
+import SettingsPage from "./pages/admin/SettingsPage";
 
 // Protected route
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -68,6 +70,7 @@ const App = () => {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                <Route path="/booking-confirmation" element={<BookingConfirmationPage />} />
 
                 {/* Protected Admin Routes */}
                 <Route
@@ -139,6 +142,15 @@ const App = () => {
                   element={
                     <ProtectedRoute requiredRole={["admin", "staff"]}>
                       <AdminMessagesPage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/dashboard/settings"
+                  element={
+                    <ProtectedRoute requiredRole={["admin", "staff"]}>
+                      <SettingsPage />
                     </ProtectedRoute>
                   }
                 />

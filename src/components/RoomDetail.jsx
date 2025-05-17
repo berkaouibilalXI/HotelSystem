@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useParams, Link, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import {
   Carousel,
@@ -17,7 +17,11 @@ import { Wifi, Coffee, CarFront, Waves, Dumbbell, Flame } from "lucide-react"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import { fadeIn, fadeInUp } from "@/components/motion/animations"
+import { getRoom } from "@/firebase/firestore"
+import { toast } from "sonner"
+import { format } from "date-fns"
 
+// Fallback data in case Firestore fails
 const roomsData = [
   {
     id: "1",
@@ -90,20 +94,77 @@ const amenityIcons = {
 
 const RoomDetail = () => {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [room, setRoom] = useState(null)
   const [selectedDates, setSelectedDates] = useState(undefined)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    // Simulate API fetch with timeout
-    const timer = setTimeout(() => {
-      const foundRoom = roomsData.find(r => r.id === id)
-      setRoom(foundRoom || null)
-      setLoading(false)
-    }, 500)
+    const fetchRoom = async () => {
+      try {
+        console.log("Fetching room with ID:", id);
+        const roomData = await getRoom(id);
+        console.log("Room data received:", roomData);
+        
+        if (roomData) {
+          setRoom(roomData);
+        } else {
+          // If Firestore returns null, try to find the room in local data
+          console.log("Room not found in Firestore, checking local data");
+          const localRoom = roomsData.find(r => r.id === id);
+          
+          if (localRoom) {
+            console.log("Found room in local data");
+            setRoom(localRoom);
+          } else {
+            console.log("Room not found in local data either");
+            setRoom(null);
+            setError("Room not found");
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching room:", err);
+        // If there's an error with Firestore, try to use local data
+        const localRoom = roomsData.find(r => r.id === id);
+        
+        if (localRoom) {
+          console.log("Using local data due to Firestore error");
+          setRoom(localRoom);
+        } else {
+          setError("Failed to load room data");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer)
-  }, [id])
+    fetchRoom();
+  }, [id]);
+
+  const handleBookNow = () => {
+    if (!selectedDates || !selectedDates.from || !selectedDates.to) {
+      toast.error("Please select check-in and check-out dates");
+      return;
+    }
+
+    // Calculate total nights and price
+    const nights = Math.round((selectedDates.to - selectedDates.from) / (1000 * 60 * 60 * 24));
+    const totalPrice = room.price * nights;
+
+    // Navigate to book-now page with room and date information
+    navigate('/book-now', {
+      state: {
+        roomId: room.id,
+        roomName: room.name,
+        roomType: room.type,
+        checkInDate: selectedDates.from,
+        checkOutDate: selectedDates.to,
+        nights: nights,
+        totalPrice: totalPrice
+      }
+    });
+  };
 
   if (loading) {
     return (
@@ -127,7 +188,7 @@ const RoomDetail = () => {
         <div className="flex-grow hotel-container py-8 md:py-12 text-center">
           <h1 className="text-3xl font-bold mb-4">Room Not Found</h1>
           <p className="mb-6">
-            Sorry, the room you are looking for does not exist.
+            {error || "Sorry, the room you are looking for does not exist."}
           </p>
           <Button asChild>
             <Link to="/rooms">Back to Rooms</Link>
@@ -189,7 +250,7 @@ const RoomDetail = () => {
             <motion.div variants={fadeInUp}>
               <Carousel className="w-full">
                 <CarouselContent>
-                  {room.images.map((image, index) => (
+                  {room.images && room.images.map((image, index) => (
                     <CarouselItem key={index}>
                       <AspectRatio ratio={16 / 9} className="bg-muted">
                         <img
@@ -323,17 +384,40 @@ const RoomDetail = () => {
                     </div>
                   </div>
 
+                  {selectedDates?.from && selectedDates?.to && (
+                    <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-md">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm">Check-in:</span>
+                        <span className="font-medium">{format(selectedDates.from, "MMM dd, yyyy")}</span>
+                      </div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm">Check-out:</span>
+                        <span className="font-medium">{format(selectedDates.to, "MMM dd, yyyy")}</span>
+                      </div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm">Nights:</span>
+                        <span className="font-medium">
+                          {Math.round((selectedDates.to - selectedDates.from) / (1000 * 60 * 60 * 24))}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-center py-3 border-t border-b">
                     <span>Total:</span>
                     <span className="text-xl font-bold">
                       $
-                      {selectedDates?.length
-                        ? room.price * (selectedDates.length - 1)
+                      {selectedDates?.from && selectedDates?.to
+                        ? room.price * Math.round((selectedDates.to - selectedDates.from) / (1000 * 60 * 60 * 24))
                         : room.price}
                     </span>
                   </div>
 
-                  <Button className="w-full mt-4" size="lg">
+                  <Button 
+                    className="w-full mt-4" 
+                    size="lg"
+                    onClick={handleBookNow}
+                  >
                     Book Now
                   </Button>
 

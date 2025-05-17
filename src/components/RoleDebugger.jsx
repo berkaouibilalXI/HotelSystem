@@ -27,27 +27,25 @@ const RoleDebugger = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg opacity-75 z-50">
-      <h3 className="font-bold">Auth Debug</h3>
-      <p>User: {user ? user.email : "Not logged in"}</p>
-      <p>UID: {user ? user.uid : "No UID"}</p>
-      <p>Role: {user ? (user.role || "No role") : "Not logged in"}</p>
-      {user && (
-        <div className="mt-2">
-          <button 
-            onClick={handleSetAdmin}
-            className="bg-red-500 text-white px-2 py-1 rounded mr-2 text-xs"
-          >
-            Set Admin
-          </button>
-          <button 
-            onClick={handleSetStaff}
-            className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
-          >
-            Set Staff
-          </button>
-        </div>
-      )}
+    <div className="p-4 bg-gray-400 rounded-lg mb-4 dark:bg-inherit">
+      <h3 className="font-bold mb-2">Role Debugger</h3>
+      <p>User ID: {user?.uid || "Not logged in"}</p>
+      <p>Email: {user?.email || "N/A"}</p>
+      <p>Role: {user?.role || "No role"}</p>
+      <div className="mt-2 space-x-2">
+        <button 
+          onClick={handleSetAdmin}
+          className="bg-blue-500 text-white px-3 py-1 rounded"
+        >
+          Set Admin
+        </button>
+        <button 
+          onClick={handleSetStaff}
+          className="bg-green-500 text-white px-3 py-1 rounded"
+        >
+          Set Staff
+        </button>
+      </div>
     </div>
   );
 };

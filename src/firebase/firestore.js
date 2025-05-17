@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { db } from "./config";
 import { 
   collection, 
@@ -14,18 +15,31 @@ import {
   setDoc
 } from "firebase/firestore";
 
+// Helper function for error handling
+const handleFirestoreError = (error, operation) => {
+  console.error(`Error during ${operation}:`, error);
+  
+  if (error.code === 'permission-denied') {
+    console.error("Permission denied. User may not have the correct role or may not be authenticated.");
+    console.error("Current user:", getAuth().currentUser);
+  }
+  
+  throw error;
+};
+
 // Room functions
 export const getRooms = async () => {
   try {
+    console.log("Getting rooms...");
     const roomsCollection = collection(db, "rooms");
     const roomsSnapshot = await getDocs(roomsCollection);
+    console.log("Rooms fetched successfully");
     return roomsSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
   } catch (error) {
-    console.error("Error getting rooms:", error);
-    throw error;
+    return handleFirestoreError(error, "getting rooms");
   }
 };
 
@@ -50,6 +64,7 @@ export const getRoom = async (id) => {
 
 export const addRoom = async (roomData) => {
   try {
+    console.log("Adding room:", roomData);
     // Ensure the data is properly formatted
     const formattedData = {
       ...roomData,
@@ -62,10 +77,10 @@ export const addRoom = async (roomData) => {
     
     const roomsCollection = collection(db, "rooms");
     const docRef = await addDoc(roomsCollection, formattedData);
+    console.log("Room added successfully with ID:", docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error("Error adding room:", error);
-    throw error;
+    return handleFirestoreError(error, "adding room");
   }
 };
 
@@ -177,13 +192,34 @@ export const deleteBooking = async (id) => {
 // Review functions
 export const getReviews = async () => {
   try {
-    const reviewsCollection = collection(db, "reviews");
-    const q = query(reviewsCollection, orderBy("createdAt", "desc"));
-    const reviewsSnapshot = await getDocs(q);
-    return reviewsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    // First try with ordering
+    try {
+      const reviewsCollection = collection(db, "reviews");
+      const q = query(reviewsCollection, orderBy("createdAt", "desc"));
+      const reviewsSnapshot = await getDocs(q);
+      return reviewsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (indexError) {
+      console.error("Index error, trying without ordering:", indexError);
+      
+      // If index error, try without the orderBy
+      const reviewsCollection = collection(db, "reviews");
+      const reviewsSnapshot = await getDocs(reviewsCollection);
+      
+      // Sort manually in memory
+      const reviews = reviewsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      // Sort by createdAt if it exists
+      return reviews.sort((a, b) => {
+        if (!a.createdAt || !b.createdAt) return 0;
+        return b.createdAt.seconds - a.createdAt.seconds;
+      });
+    }
   } catch (error) {
     console.error("Error getting reviews:", error);
     throw error;
@@ -374,3 +410,57 @@ export const updateSiteSettings = async (settingsData) => {
     throw error;
   }
 };
+
+//Image management via url (better than paid firebase storage)
+
+export const addImage = async (imageUrl, path) => {
+  try {
+    // Create a valid document ID from the path by replacing invalid characters
+    const docId = path.replace(/[\/\.\#\$\[\]]/g, '_');
+    
+    const imageRef = doc(db, "images", docId);
+    await setDoc(imageRef, {
+      url: imageUrl,
+      originalPath: path,
+      createdAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    toast.error("Failed to add image");
+    console.error("Error adding image:", error);
+    // Log more details about the error
+    if (error.code === 'permission-denied') {
+      console.error("Permission denied. User may not have the correct role.");
+    }
+    throw error;
+  }
+};
+
+export const getImage = async (path) => {
+  try {
+    const docId = path.replace(/[\/\.\#\$\[\]]/g, '_');
+    const imageRef = doc(db, "images", docId);
+    const imageDoc = await getDoc(imageRef);
+    if (imageDoc.exists()) {
+      return imageDoc.data().url;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting image:", error);
+    throw error;
+  }
+};
+
+export const deleteImage = async (path) => {
+  try {
+    const docId = path.replace(/[\/\.\#\$\[\]]/g, '_');
+    const imageRef = doc(db, "images", docId);
+    await deleteDoc(imageRef);
+    return true;
+  } catch (error) {
+    toast.error("Failed to delete image");
+    console.error("Error deleting image:", error);
+    throw error;
+  }
+};
+

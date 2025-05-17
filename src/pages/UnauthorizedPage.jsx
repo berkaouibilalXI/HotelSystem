@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "@/firebase/auth-context";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { useAuth } from "../firebase/auth-context";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const UnauthorizedPage = () => {
   const { user } = useAuth();
