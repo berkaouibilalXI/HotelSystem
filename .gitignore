@@ -7,14 +7,26 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+.pnp
+.pnp.js
+
+# Build outputs
 dist
 dist-ssr
+build
 *.local
+
+# Environment variables
+.env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
 *.suo
@@ -22,4 +34,30 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-*.env
+
+# Testing
+coverage
+.nyc_output
+
+# Temporary files
+.temp
+.tmp
+.cache
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebaserc
+
+# Generated files
+projectJSXFiles/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Package manager files
+yarn.lock
+package-lock.json
+npm-shrinkwrap.json
